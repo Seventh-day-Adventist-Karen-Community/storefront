@@ -1,7 +1,7 @@
 FROM node:18-alpine as builder
 WORKDIR /app
 COPY package*.json ./
-COPY scripts/patchReactVirtualized.js scripts/
+
 ENV CI 1
 RUN npm ci --legacy-peer-deps
 
