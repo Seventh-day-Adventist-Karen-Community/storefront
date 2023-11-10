@@ -1,26 +1,29 @@
-FROM node:18-alpine as builder
-WORKDIR /app
-COPY package*.json ./
+# Base on offical Node.js Alpine image
+FROM node:18-alpine
 
-ENV CI 1
-RUN npm i 
-# RUN npm ci --legacy-peer-deps
+# Set working directory
+WORKDIR /usr/src/app/storefront
+# RUN useradd -G www-data,root -u $uid -d /home/$user $user
 
-COPY nginx/ nginx/
+# Install PM2 globally
+RUN npm install --global pm2
 
-COPY src/ src/
+# Copy package.json and package-lock.json before other files
+# Utilise Docker cache to save re-installing dependencies if unchanged
+COPY --chown=node:node ./package*.json ./
 
-ARG API_URI
-ARG SKIP_SOURCEMAPS
+# Install dependencies
+RUN npm install
 
-ENV API_URI ${API_URI:-http://vps.sdackc.org:8009/graphql/}
-ENV SKIP_SOURCEMAPS ${SKIP_SOURCEMAPS:-true}
+# Copy all files
+COPY --chown=node:node ./ ./
+
+# Build app
 RUN npm run build
 
-FROM nginx:stable-alpine as runner
-WORKDIR /app
+# Expose the listening port
+EXPOSE 3001
 
-COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
-COPY ./nginx/replace-api-url.sh /docker-entrypoint.d/50-replace-api-url.sh
-COPY --from=builder /app/build/ /app/
-
+# Run npm start script with PM2 when container starts
+# CMD [ "npm", "run", "start" ]
+CMD [ "pm2-runtime", "npm", "--", "start" ]
