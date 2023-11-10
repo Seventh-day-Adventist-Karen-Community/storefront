@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 
 ENV CI 1
-RUN npm i
+RUN npm i 
 # RUN npm ci --legacy-peer-deps
 
 COPY nginx/ nginx/
