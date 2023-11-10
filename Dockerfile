@@ -4,7 +4,7 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /usr/src/app/storefront
 # RUN useradd -G www-data,root -u $uid -d /home/$user $user
-
+RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.shrc" SHELL="$(which sh)" sh -
 # Install PM2 globally
 RUN npm install --global pm2
 
